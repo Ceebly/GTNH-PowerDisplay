@@ -92,15 +92,15 @@ end
 
 function graphics.formatRate(delta, windowSeconds, useMetric)
   if delta == nil then return 'N/A' end
-  local rate = delta / windowSeconds
+  local rate = delta / windowSeconds / 20
   local prefix = ''
   if rate > 0 then prefix = '+'
   elseif rate < 0 then prefix = '-' end
   local absVal = math.abs(rate)
   if useMetric then
-    return prefix .. graphics.metricParser(absVal) .. '/s'
+    return prefix .. graphics.metricParser(absVal) .. '/t'
   else
-    return prefix .. graphics.scientificParser(absVal) .. '/s'
+    return prefix .. graphics.scientificParser(absVal) .. '/t'
   end
 end
 
@@ -108,10 +108,19 @@ function graphics.drawHistoryPanel(glasses, cfg, y, l, h, b1, b2)
   local ph = cfg.historyPanelHeight
   local bw = cfg.historyBorderWidth
   local fs = cfg.historyFontSize
-  local panelBottom = y - b1 - h - b2
+  local gap = b2
+  local panelBottom = y - b1 - h - b2 - gap
   local panelTop = panelBottom - ph
 
-  -- Background (matching main bar's parallelogram slant)
+  -- Border (top and right edges, matching main bar's parallelogram slant)
+  graphics.quad(glasses,
+    {0, panelBottom},
+    {2.5*h + l + bw + 1, panelBottom},
+    {1.5*h + l + bw + 1, panelTop - bw},
+    {0, panelTop - bw},
+    cfg.historyBorderColor, cfg)
+
+  -- Background (drawn on top of border, leaving border visible on top and right)
   graphics.quad(glasses,
     {0, panelBottom},
     {2.5*h + l + 1, panelBottom},
@@ -119,52 +128,40 @@ function graphics.drawHistoryPanel(glasses, cfg, y, l, h, b1, b2)
     {0, panelTop},
     cfg.historyBgColor, cfg)
 
-  -- Top border line
-  graphics.quad(glasses,
-    {0, panelTop},
-    {1.5*h + l + 1, panelTop},
-    {1.5*h + l + 1, panelTop - bw},
-    {0, panelTop - bw},
-    cfg.historyBorderColor, cfg)
-
   local labels = cfg.historyLabels
   local windows = cfg.historyWindows
   local numWindows = math.min(#labels, #windows)
   local spacing = l / numWindows
+  local lineSpacing = fs * 3 + 2
 
   local deltaTexts = {}
   local rateTexts = {}
 
   for i = 1, numWindows do
     local xPos = (i - 1) * spacing + 1.5*h
+    local labelWidth = fs * (#labels[i] + 1) * 2
 
     -- Static label (e.g. "5m:")
     graphics.text(glasses, labels[i] .. ':',
-      {xPos, panelBottom - ph + 2},
+      {xPos, panelTop + 2},
       fs, cfg.textColor, cfg)
 
-    local labelWidth = fs * (#labels[i] + 1) * 2
-
-    -- Delta value text (updated dynamically)
-    if cfg.showHistoryDelta then
+    -- Delta + percentage value text (updated dynamically)
+    if cfg.showHistoryDelta or cfg.showHistoryPercent then
       deltaTexts[i] = graphics.text(glasses, 'N/A',
-        {xPos + labelWidth, panelBottom - ph + 2},
+        {xPos + labelWidth, panelTop + 2},
         fs, cfg.historyColor, cfg)
     end
 
-    -- Rate value text (updated dynamically, on second line if both shown)
+    -- Rate value text (on second line)
     if cfg.showHistoryRate then
-      local rateY = panelBottom - ph + 2
-      if cfg.showHistoryDelta then
-        rateY = rateY + fs * 2 + 1
-      end
       rateTexts[i] = graphics.text(glasses, 'N/A',
-        {xPos + labelWidth, rateY},
+        {xPos + labelWidth, panelTop + 2 + lineSpacing},
         fs, cfg.historyColor, cfg)
     end
   end
 
-  return {deltaTexts = deltaTexts, rateTexts = rateTexts}
+  return {deltaTexts = deltaTexts, rateTexts = rateTexts, panelBottom = panelBottom, panelTop = panelTop}
 end
 
 function graphics.fox()

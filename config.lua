@@ -46,12 +46,13 @@ local function loadConfig()
   historyWindows = {300, 3600, 86400},
   historyLabels = {'5m', '1h', '24h'},
   showHistoryDelta = true,           -- show total EU change
-  showHistoryRate = true,            -- show average EU/s rate
+  showHistoryRate = true,            -- show average EU/t rate
+  showHistoryPercent = true,         -- show percentage of capacity
   historyColor = colors.electricBlue,
   historyBorderColor = colors.darkGray,
   historyBgColor = colors.darkSlateBlue,
   historyFontSize = 2.5,
-  historyPanelHeight = 14,
+  historyPanelHeight = 22,
   historyBorderWidth = 1,
 
   -- Per-Glasses Overrides (keyed by component address prefix)

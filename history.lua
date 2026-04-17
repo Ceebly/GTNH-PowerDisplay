@@ -24,7 +24,7 @@ function history.sample(euStored, sampleInterval)
 end
 
 function history.getDelta(windowSeconds)
-  if bufferSize == 0 then return nil end
+  if bufferSize < 2 then return nil end
   local now = buffer[bufferHead].time
   local currentValue = buffer[bufferHead].value
   local targetTime = now - windowSeconds
@@ -47,7 +47,6 @@ function history.getDelta(windowSeconds)
   end
 
   if bestEntry == nil then return nil end
-  if bestDiff > windowSeconds * 0.2 then return nil end
   return currentValue - bestEntry.value
 end
 

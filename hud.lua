@@ -62,7 +62,7 @@ for i = 1, #glasses do
   if cfg.showHistory then
     glasses[i].historyPanel = graphics.drawHistoryPanel(g, cfg, y, l, h, b1, b2)
     -- Maintenance text above history panel
-    local maintenanceY = y - b1 - b2 - h - cfg.historyPanelHeight - cfg.historyBorderWidth - 3*cfg.fontSize
+    local maintenanceY = glasses[i].historyPanel.panelTop - cfg.historyBorderWidth - 3*cfg.fontSize
     glasses[i].textMaintenance = graphics.text(g, '', {b2, maintenanceY}, cfg.fontSize, cfg.issueColor, cfg)
   else
     glasses[i].textMaintenance = graphics.text(g, '', {b2, y-b1-b2-h-3*cfg.fontSize}, cfg.fontSize, cfg.issueColor, cfg)
@@ -156,9 +156,23 @@ while true do
       local panel = glasses[i].historyPanel
 
       for w = 1, math.min(#deltas, #cfg.historyLabels) do
-        -- Update delta text
-        if cfg.showHistoryDelta and panel.deltaTexts[w] then
-          local deltaText = graphics.formatDelta(deltas[w], cfg.metric)
+        -- Update delta + percentage text
+        if panel.deltaTexts[w] then
+          local deltaText = ''
+          if cfg.showHistoryDelta then
+            deltaText = graphics.formatDelta(deltas[w], cfg.metric)
+          end
+          if cfg.showHistoryPercent and deltas[w] ~= nil then
+            local pct = string.format('%.1f%%', deltas[w] / capacity * 100)
+            if deltas[w] > 0 then pct = '+' .. pct end
+            if deltaText ~= '' then
+              deltaText = deltaText .. ' (' .. pct .. ')'
+            else
+              deltaText = pct
+            end
+          elseif cfg.showHistoryPercent then
+            if deltaText == '' then deltaText = 'N/A' end
+          end
           panel.deltaTexts[w].setText(deltaText)
           if deltas[w] == nil then
             panel.deltaTexts[w].setColor(graphics.RGB(cfg.textColor))
@@ -169,7 +183,7 @@ while true do
           end
         end
 
-        -- Update rate text
+        -- Update rate text (EU/t)
         if cfg.showHistoryRate and panel.rateTexts[w] then
           local rateText = graphics.formatRate(deltas[w], windows[w], cfg.metric)
           panel.rateTexts[w].setText(rateText)
