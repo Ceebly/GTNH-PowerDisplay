@@ -137,7 +137,7 @@ function graphics.drawHistoryPanel(glasses, cfg, y, l, h, b1, b2)
   local rateTexts = {}
 
   for i = 1, numWindows do
-    local xPos = (i - 1) * spacing + 1.5*h
+    local xPos = (i - 1) * spacing + 2
     local labelWidth = fs * (#labels[i] + 1) * 2
 
     -- Static label (e.g. "5m:")
