@@ -14,10 +14,11 @@ history.init(config.historySampleInterval)
 
 for address in component.list('glasses') do
   local proxy = component.proxy(component.get(address))
+  local players = proxy.getBindPlayers()
   table.insert(glasses, {
     proxy = proxy,
-    address = address,
-    cfg = config.resolve(address),
+    players = players,
+    cfg = config.resolve(players),
     lastPercent = 0,
   })
 end

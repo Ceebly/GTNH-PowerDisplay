@@ -55,11 +55,10 @@ local function loadConfig()
   historyPanelHeight = 22,
   historyBorderWidth = 1,
 
-  -- Per-Glasses Overrides (keyed by component address prefix)
-  -- To find addresses, run: lua -e "for a in component.list('glasses') do print(a) end"
+  -- Per-Player Overrides (keyed by player name)
   -- Only include settings you want to differ from the defaults above.
   -- Example:
-  -- ["a1b2c3d4"] = {
+  -- ["Steve"] = {
   --   primaryColor = colors.green,
   --   showHistory = false,
   --   fontSize = 4,
@@ -103,15 +102,16 @@ colors = {
 
 local cfg = loadConfig()
 
-local function resolveConfig(address)
+local function resolveConfig(players)
   local resolved = {}
   for k, v in pairs(cfg) do
     if k ~= 'glasses' and k ~= 'resolve' then
       resolved[k] = v
     end
   end
-  for key, overrides in pairs(cfg.glasses) do
-    if address:sub(1, #key) == key then
+  for _, player in ipairs(players) do
+    local overrides = cfg.glasses[player]
+    if overrides then
       for k, v in pairs(overrides) do
         resolved[k] = v
       end
