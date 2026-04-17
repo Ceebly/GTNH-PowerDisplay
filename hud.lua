@@ -96,6 +96,7 @@ for address in component.list('glasses') do
       players = players,
       cfg = cfg,
       lastPercent = 0,
+      pendingRedraws = 0,
       l = l, h = h, b1 = b1, b2 = b2, y = y,
     }
     if drawWidgets(entry) then
@@ -114,8 +115,12 @@ while true do
   -- corrupts widgets on the *other* terminals. Redraw only those — never the
   -- terminal that just changed, because OpenGlasses is mid-handshake on that one
   -- and our removeAll() would race its widget restoration.
+  --
+  -- A single redraw isn't always reliable: the first removeAll/addQuad pass after
+  -- a bind change races OpenGlasses-side processing and sometimes drops a few
+  -- widgets. Schedule 3 redraws across the next 3 ticks so a follow-up pass picks
+  -- up anything the first one missed.
   local changedSet = {}
-  local anyChanged = false
   for i = 1, #glasses do
     local entry = glasses[i]
     local current = getCurrentPlayers(entry.proxy)
@@ -124,14 +129,17 @@ while true do
       entry.cfg = config.resolve(current)
       entry.l, entry.h, entry.b1, entry.b2, entry.y = computeLayout(entry.cfg)
       changedSet[i] = true
-      anyChanged = true
     end
   end
-  if anyChanged then
-    for i = 1, #glasses do
-      if not changedSet[i] then
-        drawWidgets(glasses[i])
-      end
+  for i = 1, #glasses do
+    if changedSet[i] then
+      -- Skip: the changed terminal is mid-handshake, leave it to OpenGlasses.
+    elseif next(changedSet) ~= nil then
+      glasses[i].pendingRedraws = 3
+    end
+    if glasses[i].pendingRedraws > 0 then
+      drawWidgets(glasses[i])
+      glasses[i].pendingRedraws = glasses[i].pendingRedraws - 1
     end
   end
 
