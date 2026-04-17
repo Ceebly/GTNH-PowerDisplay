@@ -108,8 +108,7 @@ function graphics.drawHistoryPanel(glasses, cfg, y, l, h, b1, b2)
   local ph = cfg.historyPanelHeight
   local bw = cfg.historyBorderWidth
   local fs = cfg.historyFontSize
-  local gap = b2
-  local panelBottom = y - b1 - h - b2 - gap
+  local panelBottom = y - b1 - h - b2
   local panelTop = panelBottom - ph
 
   -- Border (top and right edges, matching main bar's parallelogram slant)
