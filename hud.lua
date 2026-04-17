@@ -53,10 +53,13 @@ local function drawWidgets(entry)
   local ok = pcall(function()
     g.removeAll()
 
-    -- Frame
-    graphics.quad(g, {0, y-b1}, {3.5*h+l+b2+1, y-b1}, {2.5*h+l+1, y-b1-h-b2}, {0, y-b1-h-b2}, cfg.borderColor, cfg)
-    graphics.quad(g, {0, y}, {3.5*h+l+b2+1, y}, {3.5*h+l+b2+1, y-b1}, {0, y-b1}, cfg.borderColor, cfg)
-    graphics.quad(g, {3.5*h, y-b1}, {3.5*h+l, y-b1}, {2.5*h+l, y-b1-h}, {2.5*h, y-b1-h}, cfg.secondaryColor, cfg)
+    -- Frame (kept on entry.staticWidgets so Lua doesn't GC the proxies and
+    -- silently drop them server-side)
+    entry.staticWidgets = {
+      graphics.quad(g, {0, y-b1}, {3.5*h+l+b2+1, y-b1}, {2.5*h+l+1, y-b1-h-b2}, {0, y-b1-h-b2}, cfg.borderColor, cfg),
+      graphics.quad(g, {0, y}, {3.5*h+l+b2+1, y}, {3.5*h+l+b2+1, y-b1}, {0, y-b1}, cfg.borderColor, cfg),
+      graphics.quad(g, {3.5*h, y-b1}, {3.5*h+l, y-b1}, {2.5*h+l, y-b1-h}, {2.5*h, y-b1-h}, cfg.secondaryColor, cfg),
+    }
 
     -- Energy bar + percentage
     entry.energyBar = graphics.quad(g, {b2+3.25*h, y-b1}, {b2+3.25*h, y-b1}, {b2+2.25*h, y-b1-h}, {b2+2.25*h, y-b1-h}, cfg.primaryColor, cfg)

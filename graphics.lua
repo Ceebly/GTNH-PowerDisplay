@@ -110,22 +110,23 @@ function graphics.drawHistoryPanel(glasses, cfg, y, l, h, b1, b2)
   local fs = cfg.historyFontSize
   local panelBottom = y - b1 - h - b2
   local panelTop = panelBottom - ph
+  local staticWidgets = {}
 
   -- Border (top and right edges, matching main bar's parallelogram slant)
-  graphics.quad(glasses,
+  table.insert(staticWidgets, graphics.quad(glasses,
     {0, panelBottom},
     {2.5*h + l + bw + 1, panelBottom},
     {1.5*h + l + bw + 1, panelTop - bw},
     {0, panelTop - bw},
-    cfg.historyBorderColor, cfg)
+    cfg.historyBorderColor, cfg))
 
   -- Background (drawn on top of border, leaving border visible on top and right)
-  graphics.quad(glasses,
+  table.insert(staticWidgets, graphics.quad(glasses,
     {0, panelBottom},
     {2.5*h + l + 1, panelBottom},
     {1.5*h + l + 1, panelTop},
     {0, panelTop},
-    cfg.historyBgColor, cfg)
+    cfg.historyBgColor, cfg))
 
   local labels = cfg.historyLabels
   local windows = cfg.historyWindows
@@ -141,9 +142,9 @@ function graphics.drawHistoryPanel(glasses, cfg, y, l, h, b1, b2)
     local labelWidth = fs * (#labels[i] + 1) * 2
 
     -- Static label (e.g. "5m:")
-    graphics.text(glasses, labels[i] .. ':',
+    table.insert(staticWidgets, graphics.text(glasses, labels[i] .. ':',
       {xPos, panelTop + 2},
-      fs, cfg.textColor, cfg)
+      fs, cfg.textColor, cfg))
 
     -- Delta + percentage value text (updated dynamically)
     if cfg.showHistoryDelta or cfg.showHistoryPercent then
@@ -160,7 +161,7 @@ function graphics.drawHistoryPanel(glasses, cfg, y, l, h, b1, b2)
     end
   end
 
-  return {deltaTexts = deltaTexts, rateTexts = rateTexts, panelBottom = panelBottom, panelTop = panelTop}
+  return {deltaTexts = deltaTexts, rateTexts = rateTexts, panelBottom = panelBottom, panelTop = panelTop, staticWidgets = staticWidgets}
 end
 
 function graphics.fox()
