@@ -40,6 +40,31 @@ local function loadConfig()
   issueColor = colors.red,
   borderColor = colors.darkGray,
 
+  -- History Panel
+  showHistory = true,
+  historySampleInterval = 10,        -- seconds between data samples
+  historyWindows = {300, 3600, 86400},
+  historyLabels = {'5m', '1h', '24h'},
+  showHistoryDelta = true,           -- show total EU change
+  showHistoryRate = true,            -- show average EU/s rate
+  historyColor = colors.electricBlue,
+  historyBorderColor = colors.darkGray,
+  historyBgColor = colors.darkSlateBlue,
+  historyFontSize = 2.5,
+  historyPanelHeight = 14,
+  historyBorderWidth = 1,
+
+  -- Per-Glasses Overrides (keyed by component address prefix)
+  -- To find addresses, run: lua -e "for a in component.list('glasses') do print(a) end"
+  -- Only include settings you want to differ from the defaults above.
+  -- Example:
+  -- ["a1b2c3d4"] = {
+  --   primaryColor = colors.green,
+  --   showHistory = false,
+  --   fontSize = 4,
+  -- },
+  glasses = {},
+
   -- Seconds between updates
   sleep = 1}
 end
@@ -49,7 +74,7 @@ colors = {
   orange = 0xFFA500,
   yellow = 0xFFFF00,
   green = 0x008000,
-  blue = 0x0000FF, 
+  blue = 0x0000FF,
   indigo = 0x4B0082,
   violet = 0x800080,
 
@@ -59,7 +84,7 @@ colors = {
   olive = 0x556B2F,
   cyan = 0x00FFFF,
   magenta = 0xFF00FF,
-    
+
   black = 0x000000,
   white = 0xFFFFFF,
   gray = 0x3C5B72,
@@ -75,4 +100,25 @@ colors = {
   darkSlateGreen = 0x2F4F4F,
   darkSlateBlue = 0x303850}
 
-return loadConfig()
+local cfg = loadConfig()
+
+local function resolveConfig(address)
+  local resolved = {}
+  for k, v in pairs(cfg) do
+    if k ~= 'glasses' and k ~= 'resolve' then
+      resolved[k] = v
+    end
+  end
+  for key, overrides in pairs(cfg.glasses) do
+    if address:sub(1, #key) == key then
+      for k, v in pairs(overrides) do
+        resolved[k] = v
+      end
+      break
+    end
+  end
+  return resolved
+end
+
+cfg.resolve = resolveConfig
+return cfg
