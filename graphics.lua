@@ -8,26 +8,24 @@ function graphics.RGB(hex)
   return r, g, b
 end
 
-function graphics.quad(glasses, v1, v2, v3, v4, color, cfg)
-  cfg = cfg or config
+function graphics.quad(glasses, v1, v2, v3, v4, color)
   local quad = glasses.addQuad()
   quad.setVertex(1, v1[1], v1[2])
   quad.setVertex(2, v2[1], v2[2])
   quad.setVertex(3, v3[1], v3[2])
   quad.setVertex(4, v4[1], v4[2])
   quad.setColor(graphics.RGB(color))
-  quad.setAlpha(cfg.shapeAlpha)
+  quad.setAlpha(config.shapeAlpha)
   return quad
 end
 
-function graphics.text(glasses, string, v1, scale, color, cfg)
-  cfg = cfg or config
+function graphics.text(glasses, string, v1, scale, color)
   local text = glasses.addTextLabel()
   text.setText(string)
   text.setPosition(v1[1], v1[2])
   text.setScale(scale/3 or 1)
   text.setColor(graphics.RGB(color))
-  text.setAlpha(cfg.textAlpha)
+  text.setAlpha(config.textAlpha)
   return text
 end
 
@@ -110,23 +108,22 @@ function graphics.drawHistoryPanel(glasses, cfg, y, l, h, b1, b2)
   local fs = cfg.historyFontSize
   local panelBottom = y - b1 - h - b2
   local panelTop = panelBottom - ph
-  local staticWidgets = {}
 
   -- Border (top and right edges, matching main bar's parallelogram slant)
-  table.insert(staticWidgets, graphics.quad(glasses,
+  graphics.quad(glasses,
     {0, panelBottom},
     {2.5*h + l + bw + 1, panelBottom},
     {1.5*h + l + bw + 1, panelTop - bw},
     {0, panelTop - bw},
-    cfg.historyBorderColor, cfg))
+    cfg.historyBorderColor)
 
   -- Background (drawn on top of border, leaving border visible on top and right)
-  table.insert(staticWidgets, graphics.quad(glasses,
+  graphics.quad(glasses,
     {0, panelBottom},
     {2.5*h + l + 1, panelBottom},
     {1.5*h + l + 1, panelTop},
     {0, panelTop},
-    cfg.historyBgColor, cfg))
+    cfg.historyBgColor)
 
   local labels = cfg.historyLabels
   local windows = cfg.historyWindows
@@ -142,26 +139,26 @@ function graphics.drawHistoryPanel(glasses, cfg, y, l, h, b1, b2)
     local labelWidth = fs * (#labels[i] + 1) * 2
 
     -- Static label (e.g. "5m:")
-    table.insert(staticWidgets, graphics.text(glasses, labels[i] .. ':',
+    graphics.text(glasses, labels[i] .. ':',
       {xPos, panelTop + 2},
-      fs, cfg.textColor, cfg))
+      fs, cfg.textColor)
 
     -- Delta + percentage value text (updated dynamically)
     if cfg.showHistoryDelta or cfg.showHistoryPercent then
       deltaTexts[i] = graphics.text(glasses, 'N/A',
         {xPos + labelWidth, panelTop + 2},
-        fs, cfg.historyColor, cfg)
+        fs, cfg.historyColor)
     end
 
     -- Rate value text (on second line)
     if cfg.showHistoryRate then
       rateTexts[i] = graphics.text(glasses, 'N/A',
         {xPos + labelWidth, panelTop + 2 + lineSpacing},
-        fs, cfg.historyColor, cfg)
+        fs, cfg.historyColor)
     end
   end
 
-  return {deltaTexts = deltaTexts, rateTexts = rateTexts, panelBottom = panelBottom, panelTop = panelTop, staticWidgets = staticWidgets}
+  return {deltaTexts = deltaTexts, rateTexts = rateTexts, panelBottom = panelBottom, panelTop = panelTop}
 end
 
 function graphics.fox()

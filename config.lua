@@ -55,16 +55,6 @@ local function loadConfig()
   historyPanelHeight = 22,
   historyBorderWidth = 1,
 
-  -- Per-Player Overrides (keyed by player name)
-  -- Only include settings you want to differ from the defaults above.
-  -- Example:
-  -- ["Steve"] = {
-  --   primaryColor = colors.green,
-  --   showHistory = false,
-  --   fontSize = 4,
-  -- },
-  glasses = {},
-
   -- Seconds between updates
   sleep = 1}
 end
@@ -100,26 +90,4 @@ colors = {
   darkSlateGreen = 0x2F4F4F,
   darkSlateBlue = 0x303850}
 
-local cfg = loadConfig()
-
-local function resolveConfig(players)
-  local resolved = {}
-  for k, v in pairs(cfg) do
-    if k ~= 'glasses' and k ~= 'resolve' then
-      resolved[k] = v
-    end
-  end
-  for _, player in ipairs(players) do
-    local overrides = cfg.glasses[player]
-    if overrides then
-      for k, v in pairs(overrides) do
-        resolved[k] = v
-      end
-      break
-    end
-  end
-  return resolved
-end
-
-cfg.resolve = resolveConfig
-return cfg
+return loadConfig()
