@@ -5,6 +5,7 @@ local scripts = {
   'graphics.lua',
   'config.lua',
   'events.lua',
+  'history.lua',
   'uninstall.lua'
 }
 

@@ -40,6 +40,21 @@ local function loadConfig()
   issueColor = colors.red,
   borderColor = colors.darkGray,
 
+  -- History Panel
+  showHistory = true,
+  historySampleInterval = 10,        -- seconds between data samples
+  historyWindows = {300, 3600, 86400},
+  historyLabels = {'5m', '1h', '24h'},
+  showHistoryDelta = true,           -- show total EU change
+  showHistoryRate = true,            -- show average EU/t rate
+  showHistoryPercent = true,         -- show percentage of capacity
+  historyColor = colors.electricBlue,
+  historyBorderColor = colors.darkGray,
+  historyBgColor = colors.darkSlateBlue,
+  historyFontSize = 2.5,
+  historyPanelHeight = 22,
+  historyBorderWidth = 1,
+
   -- Seconds between updates
   sleep = 1}
 end
@@ -49,7 +64,7 @@ colors = {
   orange = 0xFFA500,
   yellow = 0xFFFF00,
   green = 0x008000,
-  blue = 0x0000FF, 
+  blue = 0x0000FF,
   indigo = 0x4B0082,
   violet = 0x800080,
 
@@ -59,7 +74,7 @@ colors = {
   olive = 0x556B2F,
   cyan = 0x00FFFF,
   magenta = 0xFF00FF,
-    
+
   black = 0x000000,
   white = 0xFFFFFF,
   gray = 0x3C5B72,

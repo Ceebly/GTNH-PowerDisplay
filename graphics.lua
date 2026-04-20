@@ -1,7 +1,7 @@
 local graphics = {}
 local config   = require('config')
 
-local function RGB(hex)
+function graphics.RGB(hex)
   local r = ((hex >> 16) & 0xFF) / 255.0
   local g = ((hex >> 8) & 0xFF) / 255.0
   local b = ((hex) & 0xFF) / 255.0
@@ -14,7 +14,7 @@ function graphics.quad(glasses, v1, v2, v3, v4, color)
   quad.setVertex(2, v2[1], v2[2])
   quad.setVertex(3, v3[1], v3[2])
   quad.setVertex(4, v4[1], v4[2])
-  quad.setColor(RGB(color))
+  quad.setColor(graphics.RGB(color))
   quad.setAlpha(config.shapeAlpha)
   return quad
 end
@@ -24,7 +24,7 @@ function graphics.text(glasses, string, v1, scale, color)
   text.setText(string)
   text.setPosition(v1[1], v1[2])
   text.setScale(scale/3 or 1)
-  text.setColor(RGB(color))
+  text.setColor(graphics.RGB(color))
   text.setAlpha(config.textAlpha)
   return text
 end
@@ -75,6 +75,92 @@ function graphics.calcRate(percentage, last, threshold)
   end
 end
 
+function graphics.formatDelta(value, useMetric)
+  if value == nil then return 'N/A' end
+  local prefix = ''
+  if value > 0 then prefix = '+'
+  elseif value < 0 then prefix = '-' end
+  local absVal = math.abs(value)
+  if useMetric then
+    return prefix .. graphics.metricParser(absVal)
+  else
+    return prefix .. graphics.scientificParser(absVal)
+  end
+end
+
+function graphics.formatRate(delta, windowSeconds, useMetric)
+  if delta == nil then return 'N/A' end
+  local rate = delta / windowSeconds / 20
+  local prefix = ''
+  if rate > 0 then prefix = '+'
+  elseif rate < 0 then prefix = '-' end
+  local absVal = math.abs(rate)
+  if useMetric then
+    return prefix .. graphics.metricParser(absVal) .. '/t'
+  else
+    return prefix .. graphics.scientificParser(absVal) .. '/t'
+  end
+end
+
+function graphics.drawHistoryPanel(glasses, cfg, y, l, h, b1, b2)
+  local ph = cfg.historyPanelHeight
+  local bw = cfg.historyBorderWidth
+  local fs = cfg.historyFontSize
+  local panelBottom = y - b1 - h - b2
+  local panelTop = panelBottom - ph
+
+  -- Border (top and right edges, matching main bar's parallelogram slant)
+  graphics.quad(glasses,
+    {0, panelBottom},
+    {2.5*h + l + bw + 1, panelBottom},
+    {1.5*h + l + bw + 1, panelTop - bw},
+    {0, panelTop - bw},
+    cfg.historyBorderColor)
+
+  -- Background (drawn on top of border, leaving border visible on top and right)
+  graphics.quad(glasses,
+    {0, panelBottom},
+    {2.5*h + l + 1, panelBottom},
+    {1.5*h + l + 1, panelTop},
+    {0, panelTop},
+    cfg.historyBgColor)
+
+  local labels = cfg.historyLabels
+  local windows = cfg.historyWindows
+  local numWindows = math.min(#labels, #windows)
+  local spacing = l / numWindows
+  local lineSpacing = fs * 3 + 2
+
+  local deltaTexts = {}
+  local rateTexts = {}
+
+  for i = 1, numWindows do
+    local xPos = (i - 1) * spacing + 1.5*h
+    local labelWidth = fs * (#labels[i] + 1) * 2
+
+    -- Static label (e.g. "5m:")
+    graphics.text(glasses, labels[i] .. ':',
+      {xPos, panelTop + 2},
+      fs, cfg.textColor)
+
+    -- Delta + percentage value text (updated dynamically)
+    if cfg.showHistoryDelta or cfg.showHistoryPercent then
+      deltaTexts[i] = graphics.text(glasses, 'N/A',
+        {xPos + labelWidth, panelTop + 2},
+        fs, cfg.historyColor)
+    end
+
+    -- Rate value text (on second line)
+    if cfg.showHistoryRate then
+      rateTexts[i] = graphics.text(glasses, 'N/A',
+        {xPos + labelWidth, panelTop + 2 + lineSpacing},
+        fs, cfg.historyColor)
+    end
+  end
+
+  return {deltaTexts = deltaTexts, rateTexts = rateTexts, panelBottom = panelBottom, panelTop = panelTop}
+end
+
 function graphics.fox()
   print('\27[34m' .. [[
 
@@ -92,7 +178,7 @@ function graphics.fox()
     ██║  ██║╚██████╔╝█████⢰⣿⣿⣮⣉⣉⣉⣤⣴⣶⣿⣿⣋⡥⠄⠀⠀⠀⠀⠉⢻⣄
     ╚═╝  ╚═╝ ╚═════╝⠀╚════⠸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣟⣋⣁⣤⣀⣀⣤⣤⣤⣤⣄⣿
                            ⠙⠿⣿⣿⣿⣿⣿⣿⣿⡿⠿⠛⠋⠉⠁⠀⠀⠀⠀⠈⠛
-                             ⠀⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀   
+                             ⠀⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
   ]] .. '\27[0m')
 end
 
